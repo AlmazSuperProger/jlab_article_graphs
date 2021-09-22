@@ -1321,6 +1321,7 @@ def draw_graph(graphLabel,
     fig.layout.width = 1000
     fig.layout.title = graphLabel
 
+
     fig.layout.yaxis = dict(
         showgrid=True,
         zeroline=True,
