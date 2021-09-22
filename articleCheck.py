@@ -3,26 +3,10 @@
 from __future__ import unicode_literals
 
 import cgi
-import re
-import base64
-import sys
-import re
-import os.path
-import csv
-import math
-import plotly
 import plotly.graph_objs as go
-import plotly.express as px
-from plotly.subplots import make_subplots
-from plotly.offline import plot
-from plotly.graph_objs import Scatter
 import math
-
 import numpy as np
 import pandas as pd
-from scipy import interpolate
-from scipy.interpolate import RegularGridInterpolator
-from numpy import linspace, zeros, array
 from scipy.interpolate import griddata
 
 gettext = cgi.FieldStorage()
@@ -186,7 +170,6 @@ if user_choose in cos_theta_ebeam:
     experimental_name1 = 'cos(theta)=' + choose['cos_theta'][1] + ' degrees'
     experimental_name2 = 'cos(theta)=' + choose['cos_theta'][2] + ' degrees'
 
-# filename=user_choose+'/data.txt'
 
 filename = 'data/' + user_choose + '/data.txt'
 
@@ -352,7 +335,7 @@ exp_data2 = exp_data2.sort_values(by='phi')
 pointsNum = 100
 mp = 0.93827
 
-df = pd.read_csv('final_table.csv', header=None, sep='\t',
+df = pd.read_csv('final_table_cleaned.csv', header=None, sep='\t',
                  names=['Channel', 'MID',
                         'Wmin', 'Wmax', 'Q2min', 'Q2max', 'Cos(theta)',
                         'Sigma_T', 'dSigma_T', 'Sigma_L', 'dSigma_L',
@@ -1191,8 +1174,9 @@ class simpleMeasure(object):
 
 
 try:
-    graphObj = simpleMeasure(wValueUser=wValue, q2ValueUser=q2Value, cosValueUser=cosValue, ebeamValueUser=eBeamValue,
-                             epsValueUser=epsValue, phiValueUser=phiValue, particleUser=particle)
+    graphObj = simpleMeasure(wValueUser=wValue, q2ValueUser=q2Value, cosValueUser=cosValue,
+                             ebeamValueUser=eBeamValue, epsValueUser=epsValue, phiValueUser=phiValue,
+                             particleUser=particle)
 except:
     graphObj = simpleMeasure()
 
@@ -1359,13 +1343,7 @@ def draw_graph(graphLabel,
 
 
 
-fig=draw_graph(graphObj_xAxisValue=graphObj.xasixValue, graphObj_xAxisValue1=graphObj1.xasixValue, graphObj_xAxisValue2=graphObj2.xasixValue,
-           graphObj_value=graphObj.resCrossSect, graphObj_value1=graphObj1.resCrossSect, graphObj_value2=graphObj2.resCrossSect,
-           dgraphObj_value=graphObj.dresCrossSect, dgraphObj_value1=graphObj1.dresCrossSect, dgraphObj_value2=graphObj2.dresCrossSect,
-           exp_data_xAxisValue=exp_data['phi'], exp_data_xAxisValue1=exp_data1['phi'], exp_data_xAxisValue2=exp_data2['phi'],
-           exp_data_value=exp_data['cross_section'], exp_data_value1=exp_data['cross_section'], exp_data_value2=exp_data2['cross_section'],
-           dexp_data_value=exp_data['d_cross_section_all'],dexp_data_value1=exp_data1['d_cross_section_all'],dexp_data_value2=exp_data2['d_cross_section_all'],
-           graphLabel='d\u03c3/d\u03a9(mcbn/sterad)')
+
 
 print("Content-type: text/html\n")
 print("""<!DOCTYPE HTML>
@@ -1397,7 +1375,47 @@ print("""<!DOCTYPE HTML>
 
 print("<h1>{}</h1>".format(user_choose))
 
+
+
+fig=draw_graph(graphObj_xAxisValue=graphObj.xasixValue, graphObj_xAxisValue1=graphObj1.xasixValue, graphObj_xAxisValue2=graphObj2.xasixValue,
+           graphObj_value=graphObj.resCrossSect, graphObj_value1=graphObj1.resCrossSect, graphObj_value2=graphObj2.resCrossSect,
+           dgraphObj_value=graphObj.dresCrossSect, dgraphObj_value1=graphObj1.dresCrossSect, dgraphObj_value2=graphObj2.dresCrossSect,
+           exp_data_xAxisValue=exp_data['phi'], exp_data_xAxisValue1=exp_data1['phi'], exp_data_xAxisValue2=exp_data2['phi'],
+           exp_data_value=exp_data['cross_section'], exp_data_value1=exp_data['cross_section'], exp_data_value2=exp_data2['cross_section'],
+           dexp_data_value=exp_data['d_cross_section_all'],dexp_data_value1=exp_data1['d_cross_section_all'],dexp_data_value2=exp_data2['d_cross_section_all'],
+           graphLabel='d\u03c3/d\u03a9(mcbn/sterad)')
 print("{}".format(fig.to_html(full_html=False)))
+
+
+fig=draw_graph(graphObj_xAxisValue=graphObj.xasixValue, graphObj_xAxisValue1=graphObj1.xasixValue, graphObj_xAxisValue2=graphObj2.xasixValue,
+           graphObj_value=graphObj.resA, graphObj_value1=graphObj1.resA, graphObj_value2=graphObj2.resA,
+           dgraphObj_value=graphObj.dresA, dgraphObj_value1=graphObj1.dresA, dgraphObj_value2=graphObj2.dresA,
+          # exp_data_xAxisValue=exp_data['phi'], exp_data_xAxisValue1=exp_data1['phi'], exp_data_xAxisValue2=exp_data2['phi'],
+          # exp_data_value=exp_data['cross_section'], exp_data_value1=exp_data['cross_section'], exp_data_value2=exp_data2['cross_section'],
+           #dexp_data_value=exp_data['d_cross_section_all'],dexp_data_value1=exp_data1['d_cross_section_all'],dexp_data_value2=exp_data2['d_cross_section_all'],
+           graphLabel='A(mcbn/sterad)')
+print("{}".format(fig.to_html(full_html=False)))
+
+
+fig=draw_graph(graphObj_xAxisValue=graphObj.xasixValue, graphObj_xAxisValue1=graphObj1.xasixValue, graphObj_xAxisValue2=graphObj2.xasixValue,
+           graphObj_value=graphObj.resB, graphObj_value1=graphObj1.resB, graphObj_value2=graphObj2.resB,
+           dgraphObj_value=graphObj.dresB, dgraphObj_value1=graphObj1.dresB, dgraphObj_value2=graphObj2.dresB,
+          # exp_data_xAxisValue=exp_data['phi'], exp_data_xAxisValue1=exp_data1['phi'], exp_data_xAxisValue2=exp_data2['phi'],
+          # exp_data_value=exp_data['cross_section'], exp_data_value1=exp_data['cross_section'], exp_data_value2=exp_data2['cross_section'],
+           #dexp_data_value=exp_data['d_cross_section_all'],dexp_data_value1=exp_data1['d_cross_section_all'],dexp_data_value2=exp_data2['d_cross_section_all'],
+           graphLabel='B(mcbn/sterad)')
+print("{}".format(fig.to_html(full_html=False)))
+
+
+fig=draw_graph(graphObj_xAxisValue=graphObj.xasixValue, graphObj_xAxisValue1=graphObj1.xasixValue, graphObj_xAxisValue2=graphObj2.xasixValue,
+           graphObj_value=graphObj.resC, graphObj_value1=graphObj1.resC, graphObj_value2=graphObj2.resC,
+           dgraphObj_value=graphObj.dresC, dgraphObj_value1=graphObj1.dresC, dgraphObj_value2=graphObj2.dresC,
+          # exp_data_xAxisValue=exp_data['phi'], exp_data_xAxisValue1=exp_data1['phi'], exp_data_xAxisValue2=exp_data2['phi'],
+          # exp_data_value=exp_data['cross_section'], exp_data_value1=exp_data['cross_section'], exp_data_value2=exp_data2['cross_section'],
+           #dexp_data_value=exp_data['d_cross_section_all'],dexp_data_value1=exp_data1['d_cross_section_all'],dexp_data_value2=exp_data2['d_cross_section_all'],
+           graphLabel='C(mcbn/sterad)')
+print("{}".format(fig.to_html(full_html=False)))
+
 
 print("""</center>
         </body>
