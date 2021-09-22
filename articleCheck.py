@@ -16,6 +16,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 from plotly.offline import plot
 from plotly.graph_objs import Scatter
+import math
 
 import numpy as np
 import pandas as pd
@@ -24,25 +25,332 @@ from scipy.interpolate import RegularGridInterpolator
 from numpy import linspace, zeros, array
 from scipy.interpolate import griddata
 
+gettext = cgi.FieldStorage()
+user_choose = gettext.getfirst("user_choose", "empty")
+
 # считываем данные, введенные пользователем
 
 
-gettext = cgi.FieldStorage()
-q2Value = gettext.getfirst("q2", "empty")
-wValue = gettext.getfirst("w", "empty")
-cosValue = gettext.getfirst("cos", "empty")
-phiValue = gettext.getfirst("phi", "empty")
-eBeamValue = gettext.getfirst("eBeam", "empty")
-particle = gettext.getfirst("particle", "empty")
-epsValue = gettext.getfirst("eps", "empty")
+choose = 0
 
-q2Value1 = gettext.getfirst("q21", "empty")
-wValue1 = gettext.getfirst("w1", "empty")
-cosValue1 = gettext.getfirst("cos1", "empty")
-phiValue1 = gettext.getfirst("phi1", "empty")
-eBeamValue1 = gettext.getfirst("eBeam1", "empty")
-particle1 = gettext.getfirst("particle1", "empty")
-epsValue1 = gettext.getfirst("eps1", "empty")
+theta_ebeam = ['E8M54', 'E8M68']
+cos_theta_eps = ['E14M15', 'E14M20', 'E14M55', 'E14M85', 'E9M85', 'E9M100', 'E9M107', 'E9M37', 'E9M52', 'E9M282']
+cos_theta_ebeam = ['E14M117', 'E14M132', 'E14M140']
+
+if user_choose == 'E8M54':
+    choose = {'angle': 'theta', 'q2': '0.5', 'w': '1.23', 'theta': ['22.5', '37.5', '52.5'], 'ebeam': '1.515',
+              'particle': 'Pin'}
+elif user_choose == 'E8M68':
+    choose = {'angle': 'theta', 'q2': '0.5', 'w': '1.51', 'theta': ['82.5', '97.5', '112.5'], 'ebeam': '1.515',
+              'particle': 'Pin'}
+elif user_choose == 'E14M15':
+    choose = {'angle': 'cos(theta)', 'q2': '1.72', 'w': '1.43', 'cos_theta': ['0.1', '0.4', '0.7'], 'eps': '0.909',
+              'particle': 'Pin'}
+elif user_choose == 'E14M20':
+    choose = {'angle': 'cos(theta)', 'q2': '1.72', 'w': '1.53', 'cos_theta': ['-0.3', '0.1', '0.3'], 'eps': '0.909',
+              'particle': 'Pin'}
+elif user_choose == 'E14M55':
+    choose = {'angle': 'cos(theta)', 'q2': '2.05', 'w': '1.67', 'cos_theta': ['0.5', '0.7', '0.9'], 'eps': '0.8629',
+              'particle': 'Pin'}
+elif user_choose == 'E14M85':
+    choose = {'angle': 'cos(theta)', 'q2': '2.91', 'w': '1.15', 'cos_theta': ['-0.3', '0.1', '0.3'], 'eps': '0.8787',
+              'particle': 'Pin'}
+elif user_choose == 'E14M117':
+    choose = {'angle': 'cos(theta)', 'q2': '3.48', 'w': '1.23', 'cos_theta': ['-0.7', '-0.5', '-0.3'], 'ebeam': '5.75',
+              'particle': 'Pin'}
+elif user_choose == 'E14M132':
+    choose = {'angle': 'cos(theta)', 'q2': '3.48', 'w': '1.53', 'cos_theta': ['-0.1', '0.1', '0.3'], 'ebeam': '5.75',
+              'particle': 'Pin'}
+elif user_choose == 'E14M140':
+    choose = {'angle': 'cos(theta)', 'q2': '3.48', 'w': '1.69', 'cos_theta': ['-0.3', '-0.5', '-0.7'], 'ebeam': '5.75',
+              'particle': 'Pin'}
+elif user_choose == 'E9M85':
+    choose = {'angle': 'cos(theta)', 'q2': '0.525', 'w': '1.22', 'cos_theta': ['0.5', '0.7', '0.9'], 'eps': '0.781',
+              'particle': 'Pi0P'}
+elif user_choose == 'E9M100':
+    choose = {'angle': 'cos(theta)', 'q2': '0.525', 'w': '1.52', 'cos_theta': ['-0.3', '-0.1', '0.3'], 'eps': '0.517',
+              'particle': 'Pi0P'}
+elif user_choose == 'E9M107':
+    choose = {'angle': 'cos(theta)', 'q2': '0.525', 'w': '1.66', 'cos_theta': ['-0.3', '-0.1', '0.1'], 'eps': '0.303',
+              'particle': 'Pi0P'}
+elif user_choose == 'E9M37':
+    choose = {'angle': 'cos(theta)', 'q2': '1.45', 'w': '1.22', 'cos_theta': ['0.1', '0.3', '0.5'], 'eps': '0.689',
+              'particle': 'Pi0P'}
+elif user_choose == 'E9M52':
+    choose = {'angle': 'cos(theta)', 'q2': '1.45', 'w': '1.52', 'cos_theta': ['0.3', '0.5', '0.7'], 'eps': '0.495',
+              'particle': 'Pi0P'}
+elif user_choose == 'E9M282':
+    choose = {'angle': 'cos(theta)', 'q2': '1.15', 'w': '1.66', 'cos_theta': ['-0.3', '-0.4', '-0.5'], 'eps': '0.483',
+              'particle': 'Pi0P'}
+
+
+
+
+if user_choose in theta_ebeam:
+    q2_value = choose['q2']
+    w_value = choose['w']
+    cos_value = str(math.cos(float(choose['theta'][0]) * 3.14 / 180))
+    phi_value = 'empty'
+    eps_value = 'empty'
+    eBeamalue = choose['ebeam']
+    particle = choose['particle']
+    name_0 = 'theta=' + choose['theta'][0] + ' degrees'
+
+    q2Value1 = choose['q2']
+    wValue1 = choose['w']
+    cosValue1 = str(math.cos(float(choose['theta'][1]) * 3.14 / 180))
+    phiValue1 = 'empty'
+    epsValue1 = 'empty'
+    eBeamValue1 = choose['ebeam']
+    particle1 = choose['particle']
+
+    q2Value2 = choose['q2']
+    wValue2 = choose['w']
+    cosValue2 = str(math.cos(float(choose['theta'][2]) * 3.14 / 180))
+    phiValue2 = 'empty'
+    epsValue2 = 'empty'
+    eBeamValue2 = choose['ebeam']
+    particle2 = choose['particle']
+
+    name_0 = 'theta=' + choose['theta'][0] + ' degrees'
+    name_1 = 'theta=' + choose['theta'][1] + ' degrees'
+    name_2 = 'theta=' + choose['theta'][2] + ' degrees'
+
+    experimental_name = 'theta=' + choose['theta'][0] + ' degrees'
+    experimental_name1 = 'theta=' + choose['theta'][1] + ' degrees'
+    experimental_name2 = 'theta=' + choose['theta'][2] + ' degrees'
+
+if user_choose in cos_theta_eps:
+    q2Value = choose['q2']
+    wValue = choose['w']
+    cosValue = choose['cos_theta'][0]
+    phiValue = 'empty'
+    epsValue = choose['eps']
+    eBeamValue = 'empty'
+    particle = choose['particle']
+
+    q2Value1 = choose['q2']
+    wValue1 = choose['w']
+    cosValue1 = choose['cos_theta'][1]
+    phiValue1 = 'empty'
+    epsValue1 = choose['eps']
+    eBeamValue1 = 'empty'
+    particle1 = choose['particle']
+
+    q2Value2 = choose['q2']
+    wValue2 = choose['w']
+    cosValue2 = choose['cos_theta'][2]
+    phiValue2 = 'empty'
+    epsValue2 = choose['eps']
+    eBeamValue2 = 'empty'
+    particle2 = choose['particle']
+
+    name_0 = 'cos(theta)=' + choose['cos_theta'][0] + ' degrees'
+    name_1 = 'cos(theta)=' + choose['cos_theta'][1] + ' degrees'
+    name_2 = 'cos(theta)=' + choose['cos_theta'][2] + ' degrees'
+
+    experimental_name = 'cos(theta)=' + choose['cos_theta'][0] + ' degrees'
+    experimental_name1 = 'cos(theta)=' + choose['cos_theta'][1] + ' degrees'
+    experimental_name2 = 'cos(theta)=' + choose['cos_theta'][2] + ' degrees'
+
+if user_choose in cos_theta_ebeam:
+    q2Value = choose['q2']
+    wValue = choose['w']
+    cosValue = choose['cos_theta'][0]
+    phiValue = 'empty'
+    epsValue = 'empty'
+    eBeamValue = choose['ebeam']
+    particle = choose['particle']
+
+    q2Value1 = choose['q2']
+    wValue1 = choose['w']
+    cosValue1 = choose['cos_theta'][1]
+    phiValue1 = 'empty'
+    epsValue1 = 'empty'
+    eBeamValue1 = choose['ebeam']
+    particle1 = choose['particle']
+
+    q2Value2 = choose['q2']
+    wValue2 = choose['w']
+    cosValue2 = choose['cos_theta'][2]
+    phiValue2 = 'empty'
+    epsValue2 = 'empty'
+    eBeamValue2 = choose['ebeam']
+    particle2 = choose['particle']
+
+    name_0 = 'cos(theta)=' + choose['cos_theta'][0] + ' degrees'
+    name_1 = 'cos(theta)=' + choose['cos_theta'][1] + ' degrees'
+    name_2 = 'cos(theta)=' + choose['cos_theta'][2] + ' degrees'
+
+    experimental_name = 'cos(theta)=' + choose['cos_theta'][0] + ' degrees'
+    experimental_name1 = 'cos(theta)=' + choose['cos_theta'][1] + ' degrees'
+    experimental_name2 = 'cos(theta)=' + choose['cos_theta'][2] + ' degrees'
+
+# filename=user_choose+'/data.txt'
+
+filename = 'data/' + user_choose + '/data.txt'
+
+if user_choose in ['E9M107', 'E9M52']:
+    if user_choose in theta_ebeam:
+        exp_data = pd.read_csv(filename, sep='\t',
+                               names=['theta', 'phi',
+                                      'cross_section', 'd_cross_section_all'])
+
+    if user_choose in cos_theta_eps:
+        exp_data = pd.read_csv(filename, sep='\t',
+                               names=['cos_theta', 'phi',
+                                      'cross_section', 'd_cross_section_all'])
+
+    if user_choose in cos_theta_ebeam:
+        exp_data = pd.read_csv(filename, sep='\t',
+                               names=['cos_theta', 'phi',
+                                      'cross_section', 'd_cross_section_all'])
+
+    if user_choose in theta_ebeam:
+        exp_data = exp_data[exp_data['theta'] == float(choose['theta'][0])]
+
+    if user_choose in cos_theta_eps:
+        exp_data = exp_data[exp_data['cos_theta'] == float(choose['cos_theta'][0])]
+
+    if user_choose in cos_theta_ebeam:
+        exp_data = exp_data[exp_data['cos_theta'] == float(choose['cos_theta'][0])]
+
+else:
+    if user_choose in theta_ebeam:
+        exp_data = pd.read_csv(filename, sep='\t',
+                               names=['theta', 'phi',
+                                      'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in cos_theta_eps:
+        exp_data = pd.read_csv(filename, sep='\t',
+                               names=['cos_theta', 'phi',
+                                      'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in cos_theta_ebeam:
+        exp_data = pd.read_csv(filename, sep='\t',
+                               names=['cos_theta', 'phi',
+                                      'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in theta_ebeam:
+        exp_data = exp_data[exp_data['theta'] == float(choose['theta'][0])]
+
+    if user_choose in cos_theta_eps:
+        exp_data = exp_data[exp_data['cos_theta'] == float(choose['cos_theta'][0])]
+
+    if user_choose in cos_theta_ebeam:
+        exp_data = exp_data[exp_data['cos_theta'] == float(choose['cos_theta'][0])]
+
+if user_choose in ['E9M107', 'E9M52']:
+    if user_choose in theta_ebeam:
+        exp_data1 = pd.read_csv(filename, sep='\t',
+                                names=['theta', 'phi',
+                                       'cross_section', 'd_cross_section_all'])
+
+    if user_choose in cos_theta_eps:
+        exp_data1 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'd_cross_section_all'])
+
+    if user_choose in cos_theta_ebeam:
+        exp_data1 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'd_cross_section_all'])
+
+    if user_choose in theta_ebeam:
+        exp_data1 = exp_data1[exp_data1['theta'] == float(choose['theta'][1])]
+
+    if user_choose in cos_theta_eps:
+        exp_data1 = exp_data1[exp_data1['cos_theta'] == float(choose['cos_theta'][1])]
+
+    if user_choose in cos_theta_ebeam:
+        exp_data1 = exp_data1[exp_data1['cos_theta'] == float(choose['cos_theta'][1])]
+else:
+    if user_choose in theta_ebeam:
+        exp_data1 = pd.read_csv(filename, sep='\t',
+                                names=['theta', 'phi',
+                                       'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in cos_theta_eps:
+        exp_data1 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in cos_theta_ebeam:
+        exp_data1 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in theta_ebeam:
+        exp_data1 = exp_data1[exp_data1['theta'] == float(choose['theta'][1])]
+
+    if user_choose in cos_theta_eps:
+        exp_data1 = exp_data1[exp_data1['cos_theta'] == float(choose['cos_theta'][1])]
+
+    if user_choose in cos_theta_ebeam:
+        exp_data1 = exp_data1[exp_data1['cos_theta'] == float(choose['cos_theta'][1])]
+
+if user_choose in ['E9M107', 'E9M52']:
+    if user_choose in theta_ebeam:
+        exp_data2 = pd.read_csv(filename, sep='\t',
+                                names=['theta', 'phi',
+                                       'cross_section', 'd_cross_section_all'])
+
+    if user_choose in cos_theta_eps:
+        exp_data2 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'd_cross_section_all'])
+
+    if user_choose in cos_theta_ebeam:
+        exp_data2 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'd_cross_section_all'])
+
+    if user_choose in theta_ebeam:
+        exp_data2 = exp_data2[exp_data2['theta'] == float(choose['theta'][2])]
+
+    if user_choose in cos_theta_eps:
+        exp_data2 = exp_data2[exp_data2['cos_theta'] == float(choose['cos_theta'][2])]
+
+    if user_choose in cos_theta_ebeam:
+        exp_data2 = exp_data2[exp_data2['cos_theta'] == float(choose['cos_theta'][2])]
+
+else:
+    if user_choose in theta_ebeam:
+        exp_data2 = pd.read_csv(filename, sep='\t',
+                                names=['theta', 'phi',
+                                       'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in cos_theta_eps:
+        exp_data2 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in cos_theta_ebeam:
+        exp_data2 = pd.read_csv(filename, sep='\t',
+                                names=['cos_theta', 'phi',
+                                       'cross_section', 'dcross_section', 'dcross_section_syst'])
+
+    if user_choose in theta_ebeam:
+        exp_data2 = exp_data2[exp_data2['theta'] == float(choose['theta'][2])]
+
+    if user_choose in cos_theta_eps:
+        exp_data2 = exp_data2[exp_data2['cos_theta'] == float(choose['cos_theta'][2])]
+
+    if user_choose in cos_theta_ebeam:
+        exp_data2 = exp_data2[exp_data2['cos_theta'] == float(choose['cos_theta'][2])]
+
+    exp_data['d_cross_section_all'] = (exp_data['dcross_section'] ** 2 + exp_data['dcross_section_syst'] ** 2) ** 0.5
+
+    exp_data1['d_cross_section_all'] = (exp_data1['dcross_section'] ** 2 + exp_data1['dcross_section_syst'] ** 2) ** 0.5
+
+    exp_data2['d_cross_section_all'] = (exp_data2['dcross_section'] ** 2 + exp_data2['dcross_section_syst'] ** 2) ** 0.5
+
+exp_data = exp_data.sort_values(by='phi')
+exp_data1 = exp_data1.sort_values(by='phi')
+exp_data2 = exp_data2.sort_values(by='phi')
+
+pointsNum = 100
+mp = 0.93827
 
 df = pd.read_csv('final_table.csv', header=None, sep='\t',
                  names=['Channel', 'MID',
@@ -55,9 +363,6 @@ a1new = (df['Wmin'] + df['Wmax']) / 2
 a2new = (df['Q2min'] + df['Q2max']) / 2
 df = df.assign(Waverage=a1new)
 df = df.assign(Q2average=a2new)
-
-pointsNum = 100
-mp = 0.93827
 
 
 class simpleMeasure(object):
@@ -884,143 +1189,6 @@ class simpleMeasure(object):
             self.xasixValue = np.append(self.xasixValue, self.xasixValue3)
             self.xasixValue = np.append(self.xasixValue, self.xasixValue4)
 
-        # Ввели WQCOS - method 1
-        # ничего не строим, просто считаем значения (TT LT T L) в точке
-        # Ввели WQCOS и ebeam  - method 11
-        # тогда строим зависимости сечения и структурных фунций от угла phi
-        # Ввели WQCOS и phi  - method 12
-        # мдааааа, ничего не строим, рисуем табличку с структурными функциями в точке
-        # Ввели WQCOS и ebeam и phi  - method 13
-        # мдааааа, ничего не строим, рисуем табличку с сечением и структурными функциями в точке
-
-        # Ввели WQ/QCOS/WCOS - method 2/3/4
-        # строим зависимость только структурных функций от переменной Default
-        # Ввели WQ/QCOS/WCOS и ebeam  - method 21/31/41
-        # строим зависимость сечений и структурных функций (A, TT, TL) от переменной Default
-        # Ввели WQ/QCOS/WCOS и phi  - method 22/32/42
-        # строим зависимость структурных функций (TT, TL) от переменной Default
-        # Ввели WQ/QCOS/WCOS и ebeam и phi  - method 23/33/43
-        # строим зависимость сечения и структурных функций (A, TT, TL) от переменной Default
-
-
-def onePlotlyGraphWithErrors(xarray, yarray, layoutTitle, xLabel, errosArr):
-    trace = go.Scatter(
-        x=xarray,
-        y=yarray,
-        error_y=dict(
-            type='data',
-            array=errosArr,
-            color='rgba(100, 100, 255, 0.6)',
-            thickness=1.5,
-            width=3),
-        name='Interpolation',
-        marker_size=1)
-    data = [trace]
-
-    fig = go.Figure(data=data)
-    fig.layout.height = 700
-    fig.layout.width = 1000
-    fig.layout.title = layoutTitle
-
-    fig.layout.yaxis = dict(
-        showgrid=True,
-        zeroline=True,
-        showline=True,
-        gridcolor='#bdbdbd',
-        gridwidth=1,
-        zerolinecolor='black',
-        zerolinewidth=0.5,
-        linewidth=0.5,
-        title=layoutTitle,
-        titlefont=dict(
-            family='Arial, sans-serif',
-            size=18,
-            color='black'
-        ))
-    fig.layout.xaxis = dict(
-        showgrid=True,
-        zeroline=True,
-        showline=True,
-        gridcolor='#bdbdbd',
-        gridwidth=1,
-        zerolinecolor='black',
-        zerolinewidth=0.5,
-        linewidth=0.2,
-        title=xLabel,
-        titlefont=dict(
-            family='Arial, sans-serif',
-            size=18,
-            color='black'
-        ))
-
-    return fig
-
-
-def twoPlotlyGraphWithErrors(xarray, yarray, xarray1, yarray1, layoutTitle, xLabel, errosArr, errosArr1):
-    trace = go.Scatter(
-        x=xarray,
-        y=yarray,
-        error_y=dict(
-            type='data',
-            array=errosArr,
-            color='rgba(100, 100, 255, 0.6)',
-            thickness=1.5,
-            width=3),
-        name='Interpolation',
-        marker_size=1)
-    trace1 = go.Scatter(
-        x=xarray1,
-        y=yarray1,
-        mode='markers',
-        error_y=dict(
-            type='data',
-            array=errosArr1,
-            color='rgba(255, 100, 100, 1)',
-            thickness=1.5,
-            width=3),
-        name='Interpolation data',
-        marker_size=3)
-
-    data = [trace, trace1]
-
-    fig = go.Figure(data=data)
-    fig.layout.height = 700
-    fig.layout.width = 1000
-    fig.layout.title = layoutTitle
-
-    fig.layout.yaxis = dict(
-        showgrid=True,
-        zeroline=True,
-        showline=True,
-        gridcolor='#bdbdbd',
-        gridwidth=1,
-        zerolinecolor='black',
-        zerolinewidth=0.5,
-        linewidth=0.5,
-        title=layoutTitle,
-        titlefont=dict(
-            family='Arial, sans-serif',
-            size=18,
-            color='black'
-        ))
-    fig.layout.xaxis = dict(
-        showgrid=True,
-        zeroline=True,
-        showline=True,
-        gridcolor='#bdbdbd',
-        gridwidth=1,
-        zerolinecolor='black',
-        zerolinewidth=0.5,
-        linewidth=0.2,
-        title=xLabel,
-        titlefont=dict(
-            family='Arial, sans-serif',
-            size=18,
-            color='black'
-        ))
-
-    return fig
-
 
 try:
     graphObj = simpleMeasure(wValueUser=wValue, q2ValueUser=q2Value, cosValueUser=cosValue, ebeamValueUser=eBeamValue,
@@ -1035,11 +1203,147 @@ try:
 except:
     graphObj1 = simpleMeasure()
 
+try:
+    graphObj2 = simpleMeasure(wValueUser=wValue2, q2ValueUser=q2Value2, cosValueUser=cosValue2,
+                              ebeamValueUser=eBeamValue2, epsValueUser=epsValue2, phiValueUser=phiValue2,
+                              particleUser=particle2)
+except:
+    graphObj2 = simpleMeasure()
+
 graphObj.findAndUseMethod()
 graphObj.unionData()
 
 graphObj1.findAndUseMethod()
 graphObj1.unionData()
+
+graphObj2.findAndUseMethod()
+graphObj2.unionData()
+
+trace = go.Scatter(
+    x=graphObj.xasixValue,
+    y=graphObj.resCrossSect,
+    marker_color='rgba(0, 0, 255, 0.3)',
+    error_y=dict(
+        type='data',
+        array=graphObj.dresCrossSect,
+        color='rgba(0, 0, 255, 0.3)',
+        thickness=1.5,
+        width=3),
+    name='Interpolated data ' + name_0,
+    marker_size=1)
+
+exp_trace = go.Scatter(
+    x=exp_data['phi'],
+    y=exp_data['cross_section'],
+    marker_color='rgba(0, 0, 255, 1)',
+    mode='markers',
+    error_y=dict(
+        type='data',
+        array=exp_data['d_cross_section_all'],
+        color='rgba(0, 0, 255, 1)',
+        thickness=1.5,
+        width=3),
+    name='Experimental data ' + name_0,
+    marker_size=1)
+
+trace1 = go.Scatter(
+    x=graphObj1.xasixValue,
+    y=graphObj1.resCrossSect,
+    marker_color='rgba(0, 0, 0, 1)',
+    error_y=dict(
+        type='data',
+        array=graphObj1.dresCrossSect,
+        color='rgba(0, 0, 0, 1)',
+        thickness=1.5,
+        width=3),
+    name='Interpolated data ' + name_1,
+    marker_size=1)
+
+exp_trace1 = go.Scatter(
+    x=exp_data1['phi'],
+    y=exp_data['cross_section'],
+    mode='markers',
+    error_y=dict(
+        type='data',
+        array=exp_data1['d_cross_section_all'],
+        color='rgba(0, 0, 0, 1)',
+        thickness=1.5,
+        width=3),
+    name='Experimental data ' + name_1,
+    marker_size=1)
+
+trace2 = go.Scatter(
+    x=graphObj2.xasixValue,
+    y=graphObj2.resCrossSect,
+    marker_color='rgba(255, 0, 0, 0.3)',
+    error_y=dict(
+        type='data',
+        array=graphObj2.dresCrossSect,
+        color='rgba(255, 0, 0, 0.3)',
+        thickness=1.5,
+        width=3),
+    name='Interpolated data ' + name_2,
+    marker_size=1)
+
+exp_trace2 = go.Scatter(
+    x=exp_data2['phi'],
+    y=exp_data2['cross_section'],
+    marker_color='rgba(255, 0, 0, 1)',
+    mode='markers',
+    error_y=dict(
+        type='data',
+        array=exp_data2['d_cross_section_all'],
+        color='rgba(255, 0, 0, 1)',
+        thickness=1.5,
+        width=3),
+    name='Experimental data ' + name_2,
+    marker_size=1)
+
+# data = [trace2,exp_trace2]
+
+# data = [trace,exp_trace,trace1,trace2,exp_trace2]
+
+
+data = [trace, exp_trace, trace1, exp_trace1, trace2, exp_trace2]
+
+fig = go.Figure(data=data)
+fig.layout.height = 700
+fig.layout.width = 1000
+fig.layout.title = 'd\u03c3/d\u03a9(mcbn/sterad)'
+
+fig.layout.yaxis = dict(
+    showgrid=True,
+    zeroline=True,
+    showline=True,
+    gridcolor='#bdbdbd',
+    gridwidth=1,
+    zerolinecolor='black',
+    zerolinewidth=0.5,
+    linewidth=0.5,
+    title='d\u03c3/d\u03a9(mcbn/sterad)',
+    titlefont=dict(
+        family='Arial, sans-serif',
+        size=18,
+        color='black'
+    ))
+fig.layout.xaxis = dict(
+    showgrid=True,
+    zeroline=True,
+    showline=True,
+    gridcolor='#bdbdbd',
+    gridwidth=1,
+    zerolinecolor='black',
+    zerolinewidth=0.5,
+    linewidth=0.2,
+    title=graphObj.xlabel,
+    titlefont=dict(
+        family='Arial, sans-serif',
+        size=18,
+        color='black'
+    ))
+
+# fig.show()
+
 
 print("Content-type: text/html\n")
 print("""<!DOCTYPE HTML>
@@ -1067,292 +1371,11 @@ print("""<!DOCTYPE HTML>
         <body>  
         <center>
         <h1>Interpolation</h1>
-        <br> 
+        <br> """)
 
+print("<h1>{}</h1>".format(user_choose))
 
-
-
-
-
-
-        <a href="https://clas.sinp.msu.ru/cgi-bin/almaz/instruction">Instruction and available data areas</a>
-        <br>
-        <br>
-        <br>
-
-        <form method="GET" action="https://clas.sinp.msu.ru/cgi-bin/almaz/interpolateGraph.py" >
-
-      <p> <input  type="text" name="eBeam"  placeholder="Ebeam(GeV)"> </p>
-      <input  type="text" name="w"  placeholder="W(GeV)" >
-          <input  type="text" name="q2"  placeholder="Q2(GeV2)" >
-      <input  type="text" name="eps"  placeholder="eps">
-          <input  type="text" name="cos"  placeholder="Cos(theta)" >
-          <input  type="text" name="phi"  placeholder="phi(degree)">
-          <br>
-          <br>
-            <select class="select" name="particle" size="1">
-            <option value="Pin">gvp--->ПЂвЃєn</option>
-            <option value="Pi0P">gvp--->ПЂвЃ°p</option>
-            </select>
-          <br>
-          <br>
-        If you want to compare two experiments, then fill in the same columns in the bottom input field
-           <br>
-        If you do not want to compare two experiments, then leave the bottom input field blank
-        <br>
-          <br>
-          <p> <input  type="text" name="eBeam1"  placeholder="Ebeam(GeV)"> </p>
-          <input  type="text" name="w1"  placeholder="W(GeV)" >
-          <input  type="text" name="q21"  placeholder="Q2(GeV2)" >
-          <input  type="text" name="eps1"  placeholder="eps">
-          <input  type="text" name="cos1"  placeholder="Cos(theta)" >
-          <input  type="text" name="phi1"  placeholder="phi(degree)">
-          <br>
-          <br>
-            <select class="select" name="particle1" size="1">
-            <option value="Pin">gvp--->ПЂвЃєn</option>
-            <option value="Pi0P">gvp--->ПЂвЃ°p</option>
-            </select>
-          <br>
-          <br>
-
-          <br>
-          <br>
-         <p> <input class="button" class="submitbutton" type="submit" value="Find">  </p>
-         <br>
-        </form>""")
-
-# Ввели WQCOS - method 1
-# ничего не строим, просто считаем значения (TT LT T L) в точке
-# Ввели WQCOS и ebeam  - method 11
-# тогда строим зависимости сечения и структурных фунций от угла phi
-# Ввели WQCOS и phi  - method 12
-# мдааааа, ничего не строим, рисуем табличку с структурными функциями в точке
-# Ввели WQCOS и ebeam и phi  - method 13
-# мдааааа, ничего не строим, рисуем табличку с сечением и структурными функциями в точке
-
-
-# Ввели WQ/QCOS/WCOS - method 2/3/4
-# строим зависимость только структурных функций от переменной Default
-# Ввели WQ/QCOS/WCOS и ebeam  - method 21/31/41
-# строим зависимость структурных функций (A, TT, TL) от переменной Default
-# Ввели WQ/QCOS/WCOS и phi  - method 22/32/42
-# строим зависимость структурных функций (TT, TL) от переменной Default
-# Ввели WQ/QCOS/WCOS и ebeam и phi  - method 23/33/43
-# строим зависимость сечения и структурных функций (A, TT, TL) от переменной Default
-
-
-if ((graphObj.method != 0) and (graphObj1.method == 0)):
-    graphObj.getEnteredDataOneTable()
-
-    if (graphObj.method == 1):
-        graphObj.getTT_TL_T_L_tableOne()
-    if (graphObj.method == 11):
-        fig = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resCrossSect, 'd\u03c3/d\u03a9(mcbn/sterad)',
-                                       graphObj.xlabel, graphObj.dresCrossSect)
-        print("{}".format(fig.to_html(full_html=False, include_plotlyjs=False)))
-    if (graphObj.method == 12):
-        graphObj.getTT_TL_T_L_tableOne()
-    if (graphObj.method == 13):
-        graphObj.getCross_resA_TT_LT_tableOne()
-
-    if ((graphObj.method == 2) or (graphObj.method == 3) or (graphObj.method == 4)):
-        fig2 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_LT)
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj.method == 21) or (graphObj.method == 31) or (graphObj.method == 41)):
-        fig1 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resA, 'd\u03c3<sub>u</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dresA)
-        fig2 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_LT)
-        print("{}".format(fig1.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj.method == 22) or (graphObj.method == 32) or (graphObj.method == 42)):
-        fig2 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_LT)
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj.method == 23) or (graphObj.method == 33) or (graphObj.method == 43)):
-        fig = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resCrossSect, 'd\u03c3/d\u03a9(mcbn/sterad)',
-                                       graphObj.xlabel, graphObj.dresCrossSect)
-        fig1 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resA, 'd\u03c3<sub>u</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dresA)
-        fig2 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                        graphObj.dsigma_LT)
-        fig4 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_T,
-                                        'd\u03c3<sub>T</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel, graphObj.dsigma_T)
-        fig5 = onePlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_L,
-                                        'd\u03c3<sub>L</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel, graphObj.dsigma_L)
-        print("{}".format(fig.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig1.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig4.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig5.to_html(full_html=False, include_plotlyjs=False)))
-
-if ((graphObj.method == 0) and (graphObj1.method != 0)):
-    graphObj1.getEnteredDataOneTable()
-
-    if (graphObj1.method == 1):
-        graphObj1.getTT_TL_T_L_tableOne()
-    if (graphObj1.method == 11):
-        fig = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.resCrossSect, 'd\u03c3/d\u03a9(mcbn/sterad)',
-                                       graphObj1.xlabel, graphObj1.dresCrossSect)
-        print("{}".format(fig.to_html(full_html=False, include_plotlyjs=False)))
-    if (graphObj1.method == 12):
-        graphObj1.getTT_TL_T_L_tableOne()
-    if (graphObj1.method == 13):
-        graphObj1.getCross_resA_TT_LT_tableOne()
-
-    if ((graphObj1.method == 2) or (graphObj1.method == 3) or (graphObj1.method == 4)):
-        fig2 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_LT)
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj1.method == 21) or (graphObj1.method == 31) or (graphObj1.method == 41)):
-        fig1 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.resA,
-                                        'd\u03c3<sub>u</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel, graphObj1.dresA)
-        fig2 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_LT)
-        print("{}".format(fig1.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj1.method == 22) or (graphObj1.method == 32) or (graphObj1.method == 42)):
-        fig2 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_LT)
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj1.method == 23) or (graphObj1.method == 33) or (graphObj1.method == 43)):
-        fig = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.resCrossSect, 'd\u03c3/d\u03a9(mcbn/sterad)',
-                                       graphObj1.xlabel, graphObj1.dresCrossSect)
-        fig1 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.resA,
-                                        'd\u03c3<sub>u</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel, graphObj1.dresA)
-        fig2 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_TT,
-                                        'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_TT)
-        fig3 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_LT,
-                                        'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_LT)
-        fig4 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_T,
-                                        'd\u03c3<sub>T</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_T)
-        fig5 = onePlotlyGraphWithErrors(graphObj1.xasixValue, graphObj1.sigma_L,
-                                        'd\u03c3<sub>L</sub>/d\u03a9(mcbn/sterad)', graphObj1.xlabel,
-                                        graphObj1.dsigma_L)
-        print("{}".format(fig.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig1.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig4.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig5.to_html(full_html=False, include_plotlyjs=False)))
-
-# ДВА ГРАФИКА НА ОДНОМ РИСУНКЕ
-
-
-if (graphObj.method == graphObj1.method and (graphObj.method != 0)):
-    graphObj.getEnteredDataTwoTable(secondObject=graphObj1)
-    if (graphObj.method == 1):
-        graphObj.getTT_TL_T_L_tableTwo(objc=graphObj1)
-    if (graphObj.method == 11):
-        fig = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resCrossSect, graphObj1.xasixValue,
-                                       graphObj1.resCrossSect, 'd\u03c3/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                       graphObj.dresCrossSect, graphObj1.dresCrossSect)
-        print("{}".format(fig.to_html(full_html=False, include_plotlyjs=False)))
-    if (graphObj.method == 12):
-        graphObj.getTT_TL_T_L_tableTwo(objc=graphObj1)
-    if (graphObj.method == 13):
-        graphObj.getCross_resA_TT_LT_tableTwo(objc=graphObj1)
-
-    if ((graphObj.method == 2) or (graphObj.method == 3) or (graphObj.method == 4)):
-        fig2 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT, graphObj1.xasixValue,
-                                        graphObj1.sigma_TT, 'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_TT, graphObj1.dsigma_TT)
-        fig3 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT, graphObj1.xasixValue,
-                                        graphObj1.sigma_LT, 'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_LT, graphObj1.dsigma_LT)
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj.method == 21) or (graphObj.method == 31) or (graphObj.method == 41)):
-        fig1 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resA, graphObj1.xasixValue, graphObj1.resA,
-                                        'd\u03c3<sub>u</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel, graphObj.dresA,
-                                        graphObj1.dresA)
-        fig2 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT, graphObj1.xasixValue,
-                                        graphObj1.sigma_TT, 'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_TT, graphObj1.dsigma_TT)
-        fig3 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT, graphObj1.xasixValue,
-                                        graphObj1.sigma_LT, 'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_LT, graphObj1.dsigma_LT)
-        print("{}".format(fig1.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj.method == 22) or (graphObj.method == 32) or (graphObj.method == 42)):
-        fig2 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT, graphObj1.xasixValue,
-                                        graphObj1.sigma_TT, 'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_TT, graphObj1.dsigma_TT)
-        fig3 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT, graphObj1.xasixValue,
-                                        graphObj1.sigma_LT, 'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_LT, graphObj1.dsigma_LT)
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-    if ((graphObj.method == 23) or (graphObj.method == 33) or (graphObj.method == 43)):
-        fig = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resCrossSect, graphObj1.xasixValue,
-                                       graphObj1.resCrossSect, 'd\u03c3/d\u03a9(mcbn/sterad)', graphObj.xlabel,
-                                       graphObj.dresCrossSect, graphObj1.dresCrossSect)
-        fig1 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.resA, graphObj1.xasixValue, graphObj1.resA,
-                                        'd\u03c3<sub>u</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel, graphObj.dresA,
-                                        graphObj1.dresA)
-        fig2 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_TT, graphObj1.xasixValue,
-                                        graphObj1.sigma_TT, 'd\u03c3<sub>TT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_TT, graphObj1.dsigma_TT)
-        fig3 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_LT, graphObj1.xasixValue,
-                                        graphObj1.sigma_LT, 'd\u03c3<sub>LT</sub>/d\u03a9(mcbn/sterad)',
-                                        graphObj.xlabel, graphObj.dsigma_LT, graphObj1.dsigma_LT)
-        fig4 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_T, graphObj1.xasixValue, graphObj1.sigma_T,
-                                        'd\u03c3<sub>T</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel, graphObj.dsigma_T,
-                                        graphObj1.dsigma_T)
-        fig5 = twoPlotlyGraphWithErrors(graphObj.xasixValue, graphObj.sigma_L, graphObj1.xasixValue, graphObj1.sigma_L,
-                                        'd\u03c3<sub>L</sub>/d\u03a9(mcbn/sterad)', graphObj.xlabel, graphObj.dsigma_L,
-                                        graphObj1.dsigma_L)
-        print("{}".format(fig.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig1.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig2.to_html(full_html=False, include_plotlyjs=False)))
-        print("{}".format(fig3.to_html(full_html=False, include_plotlyjs=False)))
-
-if (graphObj.method != graphObj1.method and (graphObj.method != 0) and (graphObj1.method != 0)):
-    print(" please fill the same columns or leave the bottom input field blank ")
-
-if (graphObj.method == graphObj1.method and (graphObj.method == 0)):
-    print(" please read the instruction ")
+print("{}".format(fig.to_html(full_html=False)))
 
 print("""</center>
         </body>
