@@ -1219,131 +1219,152 @@ graphObj1.unionData()
 graphObj2.findAndUseMethod()
 graphObj2.unionData()
 
-trace = go.Scatter(
-    x=graphObj.xasixValue,
-    y=graphObj.resCrossSect,
-    marker_color='rgba(0, 0, 255, 0.3)',
-    error_y=dict(
-        type='data',
-        array=graphObj.dresCrossSect,
-        color='rgba(0, 0, 255, 0.3)',
-        thickness=1.5,
-        width=3),
-    name='Interpolated data ' + name_0,
-    marker_size=1)
-
-exp_trace = go.Scatter(
-    x=exp_data['phi'],
-    y=exp_data['cross_section'],
-    marker_color='rgba(0, 0, 255, 1)',
-    mode='markers',
-    error_y=dict(
-        type='data',
-        array=exp_data['d_cross_section_all'],
-        color='rgba(0, 0, 255, 1)',
-        thickness=1.5,
-        width=3),
-    name='Experimental data ' + name_0,
-    marker_size=1)
-
-trace1 = go.Scatter(
-    x=graphObj1.xasixValue,
-    y=graphObj1.resCrossSect,
-    marker_color='rgba(0, 0, 0, 1)',
-    error_y=dict(
-        type='data',
-        array=graphObj1.dresCrossSect,
-        color='rgba(0, 0, 0, 1)',
-        thickness=1.5,
-        width=3),
-    name='Interpolated data ' + name_1,
-    marker_size=1)
-
-exp_trace1 = go.Scatter(
-    x=exp_data1['phi'],
-    y=exp_data['cross_section'],
-    mode='markers',
-    error_y=dict(
-        type='data',
-        array=exp_data1['d_cross_section_all'],
-        color='rgba(0, 0, 0, 1)',
-        thickness=1.5,
-        width=3),
-    name='Experimental data ' + name_1,
-    marker_size=1)
-
-trace2 = go.Scatter(
-    x=graphObj2.xasixValue,
-    y=graphObj2.resCrossSect,
-    marker_color='rgba(255, 0, 0, 0.3)',
-    error_y=dict(
-        type='data',
-        array=graphObj2.dresCrossSect,
-        color='rgba(255, 0, 0, 0.3)',
-        thickness=1.5,
-        width=3),
-    name='Interpolated data ' + name_2,
-    marker_size=1)
-
-exp_trace2 = go.Scatter(
-    x=exp_data2['phi'],
-    y=exp_data2['cross_section'],
-    marker_color='rgba(255, 0, 0, 1)',
-    mode='markers',
-    error_y=dict(
-        type='data',
-        array=exp_data2['d_cross_section_all'],
-        color='rgba(255, 0, 0, 1)',
-        thickness=1.5,
-        width=3),
-    name='Experimental data ' + name_2,
-    marker_size=1)
-
-# data = [trace2,exp_trace2]
-
-# data = [trace,exp_trace,trace1,trace2,exp_trace2]
 
 
-data = [trace, exp_trace, trace1, exp_trace1, trace2, exp_trace2]
+def draw_graph(graphLabel,
+               graphObj_xAxisValue=[],graphObj_xAxisValue1=[],graphObj_xAxisValue2=[],
+               graphObj_value=[], graphObj_value1=[], graphObj_value2=[],
+               dgraphObj_value=[], dgraphObj_value1=[], dgraphObj_value2=[],
+               exp_data_xAxisValue=[],exp_data_xAxisValue1=[],exp_data_xAxisValue2=[],
+               exp_data_value=[], exp_data_value1=[], exp_data_value2=[],
+               dexp_data_value=[], dexp_data_value1=[], dexp_data_value2=[]):
 
-fig = go.Figure(data=data)
-fig.layout.height = 700
-fig.layout.width = 1000
-fig.layout.title = 'd\u03c3/d\u03a9(mcbn/sterad)'
 
-fig.layout.yaxis = dict(
-    showgrid=True,
-    zeroline=True,
-    showline=True,
-    gridcolor='#bdbdbd',
-    gridwidth=1,
-    zerolinecolor='black',
-    zerolinewidth=0.5,
-    linewidth=0.5,
-    title='d\u03c3/d\u03a9(mcbn/sterad)',
-    titlefont=dict(
-        family='Arial, sans-serif',
-        size=18,
-        color='black'
-    ))
-fig.layout.xaxis = dict(
-    showgrid=True,
-    zeroline=True,
-    showline=True,
-    gridcolor='#bdbdbd',
-    gridwidth=1,
-    zerolinecolor='black',
-    zerolinewidth=0.5,
-    linewidth=0.2,
-    title=graphObj.xlabel,
-    titlefont=dict(
-        family='Arial, sans-serif',
-        size=18,
-        color='black'
-    ))
+    trace = go.Scatter(
+        x=graphObj_xAxisValue,
+        y=graphObj_value,
+        marker_color='rgba(0, 0, 255, 0.3)',
+        error_y=dict(
+            type='data',
+            array=dgraphObj_value,
+            color='rgba(0, 0, 255, 0.3)',
+            thickness=1.5,
+            width=3),
+        name='Interpolated data ' + name_0,
+        marker_size=1)
+
+    exp_trace = go.Scatter(
+        x=exp_data_xAxisValue,
+        y=exp_data_value,
+        marker_color='rgba(0, 0, 255, 1)',
+        mode='markers',
+        error_y=dict(
+            type='data',
+            array=dexp_data_value,
+            color='rgba(0, 0, 255, 1)',
+            thickness=1.5,
+            width=3),
+        name='Experimental data ' + name_0,
+        marker_size=1)
+
+    trace1 = go.Scatter(
+        x=graphObj_xAxisValue1,
+        y=graphObj_value1,
+        marker_color='rgba(0, 0, 0, 1)',
+        error_y=dict(
+            type='data',
+            array=dgraphObj_value1,
+            color='rgba(0, 0, 0, 1)',
+            thickness=1.5,
+            width=3),
+        name='Interpolated data ' + name_1,
+        marker_size=1)
+
+    exp_trace1 = go.Scatter(
+        x=exp_data_xAxisValue1,
+        y=exp_data_value1,
+        mode='markers',
+        error_y=dict(
+            type='data',
+            array=dexp_data_value1,
+            color='rgba(0, 0, 0, 1)',
+            thickness=1.5,
+            width=3),
+        name='Experimental data ' + name_1,
+        marker_size=1)
+
+    trace2 = go.Scatter(
+        x=graphObj_xAxisValue2,
+        y=graphObj_value2,
+        marker_color='rgba(255, 0, 0, 0.3)',
+        error_y=dict(
+            type='data',
+            array=dgraphObj_value2,
+            color='rgba(255, 0, 0, 0.3)',
+            thickness=1.5,
+            width=3),
+        name='Interpolated data ' + name_2,
+        marker_size=1)
+
+    exp_trace2 = go.Scatter(
+        x=exp_data_xAxisValue2,
+        y=exp_data_value2,
+        marker_color='rgba(255, 0, 0, 1)',
+        mode='markers',
+        error_y=dict(
+            type='data',
+            array=dexp_data_value2,
+            color='rgba(255, 0, 0, 1)',
+            thickness=1.5,
+            width=3),
+        name='Experimental data ' + name_2,
+        marker_size=1)
+
+
+
+    # data = [trace2,exp_trace2]
+    # data = [trace,exp_trace,trace1,trace2,exp_trace2]
+    data = [trace, exp_trace, trace1, exp_trace1, trace2, exp_trace2]
+
+    fig = go.Figure(data=data)
+    fig.layout.height = 700
+    fig.layout.width = 1000
+    fig.layout.title = graphLabel
+
+    fig.layout.yaxis = dict(
+        showgrid=True,
+        zeroline=True,
+        showline=True,
+        gridcolor='#bdbdbd',
+        gridwidth=1,
+        zerolinecolor='black',
+        zerolinewidth=0.5,
+        linewidth=0.5,
+        title=graphLabel,
+        titlefont=dict(
+            family='Arial, sans-serif',
+            size=18,
+            color='black'
+        ))
+    fig.layout.xaxis = dict(
+        showgrid=True,
+        zeroline=True,
+        showline=True,
+        gridcolor='#bdbdbd',
+        gridwidth=1,
+        zerolinecolor='black',
+        zerolinewidth=0.5,
+        linewidth=0.2,
+        title=graphObj.xlabel,
+        titlefont=dict(
+            family='Arial, sans-serif',
+            size=18,
+            color='black'
+        ))
+
+    return fig
 
 # fig.show()
 
+
+
+fig=draw_graph(graphObj_xAxisValue=graphObj.xasixValue, graphObj_xAxisValue1=graphObj1.xasixValue, graphObj_xAxisValue2=graphObj2.xasixValue,
+           graphObj_value=graphObj.resCrossSect, graphObj_value1=graphObj1.resCrossSect, graphObj_value2=graphObj2.resCrossSect,
+           dgraphObj_value=graphObj.dresCrossSect, dgraphObj_value1=graphObj1.dresCrossSect, dgraphObj_value2=graphObj2.dresCrossSect,
+           exp_data_xAxisValue=exp_data['phi'], exp_data_xAxisValue1=exp_data1['phi'], exp_data_xAxisValue2=exp_data2['phi'],
+           exp_data_value=exp_data['cross_section'], exp_data_value1=exp_data['cross_section'], exp_data_value2=exp_data2['cross_section'],
+           dexp_data_value=exp_data['d_cross_section_all'],dexp_data_value1=exp_data1['d_cross_section_all'],dexp_data_value2=exp_data2['d_cross_section_all'],
+           graphLabel='d\u03c3/d\u03a9(mcbn/sterad)')
 
 print("Content-type: text/html\n")
 print("""<!DOCTYPE HTML>
